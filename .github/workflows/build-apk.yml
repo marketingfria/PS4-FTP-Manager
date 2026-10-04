@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Obtener codigo
+      - name: Descargar codigo
         uses: actions/checkout@v7
 
       - name: Configurar Java 17
@@ -33,11 +33,27 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Compilar APK
-        run: gradle assembleDebug
+      - name: Verificar estructura Gradle
+        run: |
+          echo "=== Archivos del proyecto ==="
+          ls -la
+          echo "=== Proyectos Gradle ==="
+          gradle projects
 
-      - name: Guardar APK
+      - name: Mostrar tareas Android
+        run: gradle :app:tasks --all
+
+      - name: Compilar APK Debug
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Verificar APK generado
+        run: |
+          echo "=== APK generado ==="
+          find app/build/outputs/apk -type f -name "*.apk"
+
+      - name: Subir APK
         uses: actions/upload-artifact@v4
         with:
           name: PS4-FTP-Manager
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
